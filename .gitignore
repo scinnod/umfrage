@@ -36,6 +36,9 @@ htmlcov/
 *.swo
 *~
 
+# ── Office lock files (Excel / LibreOffice) ────────────────────────────────────
+~$*
+
 # ── OS artefacts ───────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
