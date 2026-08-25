@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.1] – 2026-08-25
+
+### Added
+- **`examples/` directory** — self-contained demo questionnaire
+  ("Survey Tools in Research — A Meta-Survey") showcasing all four answer
+  types (`scale`, `yes_no`, `choices`, `freetext`), named `choice_lists` with
+  `choices_ref`, and the full generate → distribute → collect workflow with
+  three pre-filled response files.
+
+---
+
 ## [0.3.0] – 2026-08-17
 
 ### Added

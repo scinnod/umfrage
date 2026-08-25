@@ -146,6 +146,22 @@ The result file has:
 
 ---
 
+## Examples
+
+The `examples/` directory contains **"Survey Tools in Research — A Meta-Survey"** — a
+self-contained demo questionnaire demonstrating all four answer types (`scale`,
+`yes_no`, `choices`, `freetext`), `choice_lists`, and the full
+generate → distribute → collect workflow with three pre-filled responses from
+the Duckburg academic universe.
+
+See [examples/README.md](examples/README.md) for details and instructions.
+
+![Generated questionnaire form](docs/screenshots/example_questionnaire.png)
+
+![Aggregated result spreadsheet](docs/screenshots/example_results.png)
+
+---
+
 ## CLI Reference
 
 ### `umfrage validate CONFIG`

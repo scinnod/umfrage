@@ -1,0 +1,122 @@
+# yaml-language-server: $schema=../docs/questionnaire.schema.json
+#
+# ──────────────────────────────────────────────────────────────────────────────
+# umfrage — Example Questionnaire
+# "Survey Tools in Research — A Meta-Survey"
+# ──────────────────────────────────────────────────────────────────────────────
+#
+# A meta-survey: a questionnaire about questionnaire tools, made with umfrage.
+# Demonstrates all four answer types (scale, yes_no, choices, freetext),
+# choice_lists with choices_ref, and optional respondent fields and questions.
+#
+# Regenerate the Excel form:
+#   umfrage generate examples/questionnaire.yaml --style examples/style.yaml \
+#           --output-dir examples/
+#
+# See examples/README.md for the full workflow.
+# ──────────────────────────────────────────────────────────────────────────────
+
+title: "Survey Tools in Research — A Meta-Survey"
+version: "1.0"
+language: "en"
+
+organizer:
+  name: "Prof. Dr. Ludwig von Drake"
+  institution: "Duckburg Academy of Sciences"
+  email: "l.von-drake@duckburg.edu"
+
+respondent_fields:
+  - label: "Name"
+    required: true
+  - label: "Institution"
+    required: true
+  - label: "Email"
+    required: false
+
+# ── Reusable option lists ─────────────────────────────────────────────────────
+
+choice_lists:
+  questionnaire_format:
+    - "YAML-configured Excel (umfrage)"
+    - "Web forms (e.g., LimeSurvey, SurveyMonkey)"
+    - "Paper forms"
+    - "LaTeX-compiled PDF"
+    - "Other"
+  critical_feature:
+    - "Automated result aggregation"
+    - "Data validation / input dropdowns"
+    - "Protected / tamper-evident forms"
+    - "Version control compatibility"
+    - "Offline use without internet access"
+
+# ── Sections ──────────────────────────────────────────────────────────────────
+
+sections:
+  - title: "Usage Patterns"
+    questions:
+      - id: "META.Q1"
+        text: "How frequently do you design or distribute questionnaires in your work?"
+        answer:
+          type: scale
+          min_value: 1
+          max_value: 5
+          description: "1 = rarely or never, 5 = regularly, multiple times per year"
+        required: true
+
+      - id: "META.Q2"
+        text: "Does your institution currently use Excel-based survey forms (rather than web-based)?"
+        answer:
+          type: yes_no
+        required: true
+
+      - id: "META.Q3"
+        text: "Which questionnaire distribution format do you prefer?"
+        answer:
+          type: choices
+          choices_ref: questionnaire_format
+        required: true
+
+      - id: "META.Q4"
+        text: "If you have a preferred survey tool, please name it."
+        answer:
+          type: freetext
+        required: false
+
+  - title: "Tool Requirements"
+    questions:
+      - id: "META.Q5"
+        text: "How important is it for a questionnaire tool to be freely available and open-source?"
+        answer:
+          type: scale
+          min_value: 1
+          max_value: 5
+          description: "1 = irrelevant, 5 = essential"
+        required: true
+
+      - id: "META.Q6"
+        text: "How important is consistent layout reproduction across all recipient workstations?"
+        answer:
+          type: scale
+          min_value: 1
+          max_value: 5
+          description: "1 = irrelevant, 5 = essential"
+        required: true
+
+      - id: "META.Q7"
+        text: "Would you accept defining questionnaires in a structured text format such as YAML?"
+        answer:
+          type: yes_no
+        required: true
+
+      - id: "META.Q8"
+        text: "Which tool feature do you consider most critical?"
+        answer:
+          type: choices
+          choices_ref: critical_feature
+        required: true
+
+      - id: "META.Q9"
+        text: "Any additional requirements, comments, or suggestions?"
+        answer:
+          type: freetext
+        required: false
