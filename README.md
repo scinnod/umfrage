@@ -158,6 +158,11 @@ See [examples/README.md](examples/README.md) for details and instructions.
 
 ![Generated questionnaire form](docs/screenshots/example_questionnaire.png)
 
+Each respondent receives a protected Excel form with data-validated answer cells
+(dropdowns for scale, yes/no, and choices) and fills it in locally — no internet
+connection or server required.  After collection, `umfrage collect` aggregates
+all returned files into a single result spreadsheet:
+
 ![Aggregated result spreadsheet](docs/screenshots/example_results.png)
 
 ---
