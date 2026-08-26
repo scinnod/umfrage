@@ -54,7 +54,7 @@ choice_lists:
 sections:
   - title: "Usage Patterns"
     questions:
-      - id: "META.Q1"
+      - id: "USG.Q1"
         text: "How frequently do you design or distribute questionnaires in your work?"
         answer:
           type: scale
@@ -63,20 +63,21 @@ sections:
           description: "1 = rarely or never, 5 = regularly, multiple times per year"
         required: true
 
-      - id: "META.Q2"
+      - id: "USG.Q2"
         text: "Does your institution currently use Excel-based survey forms (rather than web-based)?"
         answer:
           type: yes_no
         required: true
 
-      - id: "META.Q3"
+      - id: "USG.Q3"
         text: "Which questionnaire distribution format do you prefer?"
         answer:
           type: choices
           choices_ref: questionnaire_format
+        comment: "Choose your preferred distribution format from the dropdown"
         required: true
 
-      - id: "META.Q4"
+      - id: "USG.Q4"
         text: "If you have a preferred survey tool, please name it."
         answer:
           type: freetext
@@ -84,7 +85,7 @@ sections:
 
   - title: "Tool Requirements"
     questions:
-      - id: "META.Q5"
+      - id: "REQ.Q1"
         text: "How important is it for a questionnaire tool to be freely available and open-source?"
         answer:
           type: scale
@@ -93,7 +94,7 @@ sections:
           description: "1 = irrelevant, 5 = essential"
         required: true
 
-      - id: "META.Q6"
+      - id: "REQ.Q2"
         text: "How important is consistent layout reproduction across all recipient workstations?"
         answer:
           type: scale
@@ -102,20 +103,21 @@ sections:
           description: "1 = irrelevant, 5 = essential"
         required: true
 
-      - id: "META.Q7"
+      - id: "REQ.Q3"
         text: "Would you accept defining questionnaires in a structured text format such as YAML?"
         answer:
           type: yes_no
         required: true
 
-      - id: "META.Q8"
+      - id: "REQ.Q4"
         text: "Which tool feature do you consider most critical?"
         answer:
           type: choices
           choices_ref: critical_feature
+        comment: "Select the single most critical feature from the dropdown"
         required: true
 
-      - id: "META.Q9"
+      - id: "REQ.Q5"
         text: "Any additional requirements, comments, or suggestions?"
         answer:
           type: freetext
