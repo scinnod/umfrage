@@ -167,6 +167,25 @@ all returned files into a single result spreadsheet:
 
 ---
 
+## Web Interface
+
+`umfrage` includes an optional browser-based questionnaire generator:
+
+```bash
+pip install 'umfrage[web]'
+umfrage serve          # opens http://127.0.0.1:5000
+```
+
+The web interface provides a YAML editor with live syntax and schema
+validation, an optional style-file upload, and a one-click **Generate &
+Download ZIP** button.  Survey **collection** is intentionally not
+exposed — use `umfrage collect` on the CLI for that step.
+
+See [docs/web_server.md](docs/web_server.md) for full details, security
+notes, and shared-server deployment guidance.
+
+---
+
 ## CLI Reference
 
 ### `umfrage validate CONFIG`

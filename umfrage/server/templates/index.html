@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>umfrage — Questionnaire Generator</title>
+
+  <!-- CodeMirror 5: core, YAML mode, lint addon, js-yaml v3 for syntax checking -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/lint/lint.css">
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/yaml/yaml.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/lint/lint.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-yaml@3.14.1/dist/js-yaml.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/lint/yaml-lint.js"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Prevent display:flex/grid rules from overriding the hidden attribute */
+    [hidden] { display: none !important; }
+
+    :root {
+      --blue:    #2563eb;
+      --blue-dk: #1d4ed8;
+      --green:   #16a34a;
+      --red:     #dc2626;
+      --gray-50: #f9fafb;
+      --gray-100:#f3f4f6;
+      --gray-200:#e5e7eb;
+      --gray-700:#374151;
+      --gray-900:#111827;
+      --radius:  6px;
+      --shadow:  0 1px 3px rgba(0,0,0,.10);
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      color: var(--gray-900);
+      background: var(--gray-50);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── header ── */
+    header {
+      background: var(--blue);
+      color: #fff;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+    header h1 { font-size: 18px; font-weight: 700; letter-spacing: -.3px; }
+    header span { font-size: 13px; opacity: .8; }
+    header a { color: rgba(255,255,255,.75); font-size: 12px; margin-left: auto;
+               text-decoration: none; }
+    header a:hover { color: #fff; text-decoration: underline; }
+
+    /* ── main layout ── */
+    main {
+      flex: 1;
+      max-width: 960px;
+      width: 100%;
+      margin: 24px auto;
+      padding: 0 16px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* ── card ── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    /* ── toolbar ── */
+    .toolbar {
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .toolbar-group { display: flex; align-items: center; gap: 8px; }
+    .toolbar-sep {
+      width: 1px; height: 24px;
+      background: var(--gray-200);
+      margin: 0 4px;
+    }
+    .toolbar label.file-label { font-size: 13px; color: var(--gray-700); }
+
+    /* ── buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      border-radius: var(--radius);
+      border: 1px solid var(--gray-200);
+      background: #fff;
+      color: var(--gray-700);
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s, border-color .15s;
+    }
+    .btn:hover { background: var(--gray-100); border-color: var(--gray-700); }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 22px;
+      font-size: 14px;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--blue-dk); border-color: var(--blue-dk); }
+
+    /* ── file inputs (hidden, activated by label) ── */
+    input[type="file"] { display: none; }
+
+    /* ── schema / style note ── */
+    .style-row {
+      padding: 8px 16px;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      font-size: 13px;
+      color: var(--gray-700);
+      line-height: 1.6;
+    }
+    .style-row a { color: var(--blue); }
+    #style-name {
+      font-size: 12px;
+      color: var(--gray-700);
+      font-style: italic;
+    }
+
+    /* ── editor ── */
+    #editor-container .CodeMirror {
+      height: clamp(320px, calc(100vh - 460px), 680px);
+      font-size: 13px;
+      font-family: 'Fira Mono', Consolas, 'Courier New', monospace;
+      border: none;
+      line-height: 1.5;
+    }
+    #editor-container .CodeMirror-scroll { overflow: auto !important; }
+
+    /* ── actions bar ── */
+    .actions {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-top: 1px solid var(--gray-200);
+    }
+    .spinner {
+      font-size: 13px;
+      color: var(--gray-700);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-icon {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid var(--gray-200);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+
+    /* ── status message ── */
+    #status {
+      margin: 0 16px 16px;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    #status.success { background: #f0fdf4; border: 1px solid #bbf7d0; color: var(--green); }
+    #status.error   { background: #fef2f2; border: 1px solid #fecaca; color: var(--red); }
+
+    /* ── info footer ── */
+    .info-box {
+      padding: 14px 18px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius);
+      font-size: 13px;
+      color: var(--gray-700);
+      line-height: 1.6;
+    }
+    .info-box a { color: var(--blue); }
+    .info-box strong { color: var(--gray-900); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>umfrage</h1>
+  <span id="hd-subtitle">Questionnaire Generator</span>
+  <a href="https://github.com/scinnod/umfrage" target="_blank" rel="noopener">
+    github.com/scinnod/umfrage ↗
+  </a>
+</header>
+
+<main>
+  <div class="card">
+    <!-- File controls -->
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <label class="btn" for="load-file" id="lbl-load">⬆ Load YAML</label>
+        <input type="file" id="load-file" accept=".yaml,.yml">
+        <button class="btn" id="save-btn">⬇ Download YAML</button>
+      </div>
+      <div class="toolbar-sep"></div>
+      <div class="toolbar-group">
+        <span class="file-label" id="lbl-style-prefix">Style file (optional):</span>
+        <label class="btn" for="style-file" id="lbl-style-choose">Choose…</label>
+        <input type="file" id="style-file" accept=".yaml,.yml">
+        <span id="style-name">no file selected</span>
+      </div>
+    </div>
+
+    <!-- Schema / style note — filled by applyTranslations() -->
+    <div class="style-row" id="validation-note"></div>
+
+    <!-- CodeMirror editor -->
+    <div id="editor-container"></div>
+
+    <!-- Generate action -->
+    <div class="actions">
+      <button class="btn btn-primary" id="generate-btn">⚡ Generate &amp; Download ZIP</button>
+      <div class="spinner" id="spinner" hidden>
+        <span class="spinner-icon"></span>
+        <span id="lbl-generating">Generating…</span>
+      </div>
+    </div>
+
+    <!-- Status / error -->
+    <div id="status" role="alert" hidden></div>
+  </div>
+
+  <!-- LLM guide notice — filled by applyTranslations() -->
+  <div class="info-box" id="llm-box"></div>
+</main>
+
+<script nonce="{{ nonce }}">
+// ── i18n ─────────────────────────────────────────────────────────────────────
+const LANG = navigator.language.startsWith('de') ? 'de' : 'en';
+
+const T = {
+  en: {
+    subtitle:    'Questionnaire Generator',
+    btnLoad:     '\u2b06 Load YAML',
+    btnSave:     '\u2b07 Download YAML',
+    stylePrefix: 'Style file (optional):',
+    styleChoose: 'Choose\u2026',
+    styleNone:   'no file selected',
+    btnGenerate: '\u26a1 Generate \u0026 Download ZIP',
+    generating:  'Generating\u2026',
+    dlStarted:   '\u2713 Download started: ',
+    reqFailed:   'Request failed: ',
+    serverErr:   'Validation error:',
+    validationNoteHtml:
+      'Questionnaire YAML is validated for syntax errors as you type. '
+      + 'Use the <em>style file</em> to customise colours and fonts '
+      + '(see <a href="https://github.com/scinnod/umfrage/blob/main/config/style_sample.yaml"'
+      + ' target="_blank" rel="noopener">style_sample.yaml</a>).',
+    llmBoxHtml:
+      '<strong>\ud83d\udca1 AI-assisted authoring:</strong> '
+      + 'The <a href="https://github.com/scinnod/umfrage/blob/main/docs/llm_guide.md"'
+      + ' target="_blank" rel="noopener">LLM authoring guide</a>'
+      + ' provides a full field reference, constraints, and examples'
+      + ' for use as context with any AI assistant (ChatGPT, Claude, etc.).'
+      + ' Share it together with your authoring request to get a valid YAML back.',
+  },
+  de: {
+    subtitle:    'Fragebogen-Generator',
+    btnLoad:     '\u2b06 YAML laden',
+    btnSave:     '\u2b07 YAML herunterladen',
+    stylePrefix: 'Style-Datei (optional):',
+    styleChoose: 'Ausw\u00e4hlen\u2026',
+    styleNone:   'keine Datei ausgew\u00e4hlt',
+    btnGenerate: '\u26a1 ZIP generieren \u0026 herunterladen',
+    generating:  'Wird generiert\u2026',
+    dlStarted:   '\u2713 Download gestartet: ',
+    reqFailed:   'Anfrage fehlgeschlagen: ',
+    serverErr:   'Validierungsfehler:',
+    validationNoteHtml:
+      'Das Fragebogen-YAML wird beim Tippen auf Syntaxfehler gepr\u00fcft. '
+      + 'Mit der <em>Style-Datei</em> lassen sich Farben und Schriften anpassen '
+      + '(siehe <a href="https://github.com/scinnod/umfrage/blob/main/config/style_sample.yaml"'
+      + ' target="_blank" rel="noopener">style_sample.yaml</a>).',
+    llmBoxHtml:
+      '<strong>\ud83d\udca1 KI-gest\u00fctztes Authoring:</strong> '
+      + 'Der <a href="https://github.com/scinnod/umfrage/blob/main/docs/llm_guide.md"'
+      + ' target="_blank" rel="noopener">LLM-Leitfaden</a>'
+      + ' enth\u00e4lt eine vollst\u00e4ndige Feldreferenz, Einschr\u00e4nkungen und Beispiele'
+      + ' als Kontext f\u00fcr KI-Assistenten (ChatGPT, Claude u.\u00a0a.).'
+      + ' Teilen Sie ihn zusammen mit Ihrem Erstellungsauftrag, um ein g\u00fcltiges YAML zu erhalten.',
+  },
+};
+
+function applyTranslations() {
+  var t = T[LANG];
+  document.getElementById('hd-subtitle').textContent      = t.subtitle;
+  document.getElementById('lbl-load').textContent         = t.btnLoad;
+  document.getElementById('save-btn').textContent         = t.btnSave;
+  document.getElementById('lbl-style-prefix').textContent = t.stylePrefix;
+  document.getElementById('lbl-style-choose').textContent = t.styleChoose;
+  document.getElementById('style-name').textContent       = t.styleNone;
+  document.getElementById('generate-btn').textContent     = t.btnGenerate;
+  document.getElementById('lbl-generating').textContent   = t.generating;
+  // Safe: strings are hardcoded in this script, not from user input
+  document.getElementById('validation-note').innerHTML    = t.validationNoteHtml;
+  document.getElementById('llm-box').innerHTML            = t.llmBoxHtml;
+}
+
+applyTranslations();
+
+// ── CodeMirror 5 editor ───────────────────────────────────────────────────────
+// Lint uses window.jsyaml (js-yaml v3) registered by addon/lint/yaml-lint.js
+var editor = CodeMirror(document.getElementById('editor-container'), {
+  mode: 'yaml',
+  lineNumbers: true,
+  lineWrapping: true,
+  gutters: ['CodeMirror-lint-markers'],
+  lint: true,
+  tabSize: 2,
+  indentWithTabs: false,
+  extraKeys: { Tab: function(cm) { cm.execCommand('insertSoftTab'); } },
+});
+
+// ── Load from file ────────────────────────────────────────────────────────────
+document.getElementById('load-file').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) { editor.setValue(ev.target.result); };
+  reader.readAsText(file);
+  e.target.value = '';  // allow reloading the same file after editing
+});
+
+// ── Save to file ──────────────────────────────────────────────────────────────
+document.getElementById('save-btn').addEventListener('click', function() {
+  var blob = new Blob([editor.getValue()], { type: 'text/yaml' });
+  var url  = URL.createObjectURL(blob);
+  var a    = document.createElement('a');
+  a.href = url; a.download = 'questionnaire.yaml';
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+});
+
+// ── Style file (persisted across Generate calls) ──────────────────────────────
+var styleFile = null;
+document.getElementById('style-file').addEventListener('change', function(e) {
+  styleFile = e.target.files[0] || null;
+  document.getElementById('style-name').textContent = styleFile ? styleFile.name : T[LANG].styleNone;
+});
+
+// ── Generate ──────────────────────────────────────────────────────────────────
+document.getElementById('generate-btn').addEventListener('click', async function() {
+  var t        = T[LANG];
+  var btn      = document.getElementById('generate-btn');
+  var spinner  = document.getElementById('spinner');
+  var statusEl = document.getElementById('status');
+
+  statusEl.hidden = true;
+  spinner.hidden  = false;
+  btn.disabled    = true;
+
+  try {
+    var formData = new FormData();
+    formData.append('yaml_content', editor.getValue());
+    if (styleFile) formData.append('style_file', styleFile);
+
+    var resp = await fetch('/api/generate', { method: 'POST', body: formData });
+
+    if (!resp.ok) {
+      var errData = await resp.json().catch(function() { return { error: 'HTTP ' + resp.status }; });
+      showStatus('error', t.serverErr + '\n' + (errData.error || ('HTTP ' + resp.status)));
+      return;
+    }
+
+    var blob        = await resp.blob();
+    var disposition = resp.headers.get('Content-Disposition') || '';
+    var match       = disposition.match(/filename="?([^";\r\n]+)"?/);
+    var filename    = match ? match[1] : 'questionnaire.zip';
+
+    var url = URL.createObjectURL(blob);
+    var a   = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+
+    showStatus('success', t.dlStarted + filename);
+  } catch (e) {
+    showStatus('error', T[LANG].reqFailed + e.message);
+  } finally {
+    spinner.hidden = true;
+    btn.disabled   = false;
+  }
+});
+
+function showStatus(type, msg) {
+  var el = document.getElementById('status');
+  el.className = 'status ' + type;
+  el.textContent = msg;
+  el.hidden = false;
+}
+</script>
+
+</body>
+</html>

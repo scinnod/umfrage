@@ -1,0 +1,174 @@
+{
+  "$comment": "Mirror of docs/questionnaire.schema.json — keep in sync when the schema changes.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/umfrage/umfrage/blob/main/docs/questionnaire.schema.json",
+  "title": "umfrage Questionnaire Configuration",
+  "description": "Schema for questionnaire YAML files used with the umfrage CLI tool. Add '# yaml-language-server: $schema=../docs/questionnaire.schema.json' at the top of your YAML file to enable IDE validation and autocomplete.",
+  "type": "object",
+  "required": ["title", "organizer", "respondent_fields", "sections"],
+  "additionalProperties": false,
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable title of the questionnaire (used in Excel headers and as the basis for the file name slug)."
+    },
+    "version": {
+      "type": "string",
+      "default": "1.0",
+      "description": "Version string for the questionnaire. Increment when making changes that would invalidate existing responses."
+    },
+    "language": {
+      "type": "string",
+      "default": "en",
+      "description": "Language code for all static UI labels in the generated Excel file (column headers, yes/no dropdown values, hints, etc.). Must match a YAML file in umfrage/i18n/. Built-in codes: 'en' (English), 'de' (German). Add umfrage/i18n/<code>.yaml to register a new language.",
+      "examples": ["en", "de"]
+    },
+    "choice_lists": {
+      "type": "object",
+      "description": "Named reusable choice lists. Keys are arbitrary identifiers; values are the list of option strings. Reference a list in any choices-type question with 'choices_ref: <name>'. At least 2 options per list. The comma-joined options must not exceed 255 characters (Excel DV formula limit).",
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string" },
+        "minItems": 2
+      }
+    },
+    "organizer": {
+      "type": "object",
+      "description": "Information about the person or institution conducting the questionnaire.",
+      "required": ["name", "institution", "email"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Full name of the organizer."
+        },
+        "institution": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the organizer's institution or organization."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Contact email address of the organizer."
+        },
+        "phone": {
+          "type": ["string", "null"],
+          "description": "Optional contact phone number."
+        }
+      }
+    },
+    "respondent_fields": {
+      "type": "array",
+      "description": "Metadata fields that each respondent must fill in. Typical fields: Name, Institution, Email.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["label"],
+        "additionalProperties": false,
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Display label shown next to the input field in the Excel file."
+          },
+          "required": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether this field must be filled in. Empty required fields cause validation failure during collection."
+          }
+        }
+      }
+    },
+    "sections": {
+      "type": "array",
+      "description": "Ordered list of sections (chapters) in the questionnaire. Each section groups related questions.",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["title", "questions"],
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Section title shown as a colored header row in the Excel file."
+          },
+          "questions": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Ordered list of questions in this section.",
+            "items": {
+              "type": "object",
+              "required": ["id", "text", "answer"],
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-zA-Z0-9]([a-zA-Z0-9._-]*[a-zA-Z0-9])?$",
+                  "description": "Unique question identifier. Slug-safe: letters, digits, dots, hyphens, underscores. Must start and end with a letter or digit. Examples: 'S1.Q1', 'general.q01', 'tech-2'."
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "The full question text displayed to respondents in the Excel file."
+                },
+                "answer": {
+                  "type": "object",
+                  "description": "Configuration for the expected answer type and constraints.",
+                  "required": ["type"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["scale", "yes_no", "freetext", "choices"],
+                      "description": "Answer type. 'scale': integer in [min_value, max_value]; 'yes_no': exactly 'Yes' or 'No'; 'freetext': any non-empty string; 'choices': one of a fixed set of options shown as a dropdown."
+                    },
+                    "min_value": {
+                      "type": ["integer", "null"],
+                      "description": "Required for 'scale' type. Inclusive lower bound. Must be strictly less than max_value."
+                    },
+                    "max_value": {
+                      "type": ["integer", "null"],
+                      "description": "Required for 'scale' type. Inclusive upper bound. Must be strictly greater than min_value."
+                    },
+                    "description": {
+                      "type": ["string", "null"],
+                      "description": "Optional hint text shown in the Scale/Comment column."
+                    },
+                    "choices": {
+                      "type": ["array", "null"],
+                      "description": "Inline option list for 'choices' type. Provide either this or choices_ref, not both. At least 2 items required. The comma-joined string must not exceed 255 characters.",
+                      "items": { "type": "string" },
+                      "minItems": 2
+                    },
+                    "choices_ref": {
+                      "type": ["string", "null"],
+                      "description": "Name of a list defined in the top-level choice_lists dict. Provide either this or choices, not both."
+                    },
+                    "show_choices_in_comment": {
+                      "type": "boolean",
+                      "default": true,
+                      "description": "CHOICES type only. When false, the auto-generated option list is not shown in the Scale/Comment column — useful when the list is long and would make the column too wide. The description field is still shown instead. Has no effect when a 'comment' is also set on the question, because an explicit comment is a complete override for all types (identical behaviour to scale, yes_no, and freetext)."
+                    }
+                  }
+                },
+                "comment": {
+                  "type": ["string", "null"],
+                  "description": "Additional context shown in the Scale/Comment column. Overrides any auto-generated hint (scale range, choices list, etc.)."
+                },
+                "required": {
+                  "type": "boolean",
+                  "default": true,
+                  "description": "Whether an answer is mandatory. Empty required answers fail validation during collection."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

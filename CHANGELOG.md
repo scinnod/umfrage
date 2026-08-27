@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.4.0] – 2026-08-27
+
+### Added
+- **`umfrage serve`** — new optional web interface for browser-based questionnaire
+  generation.  Install with `pip install 'umfrage[web]'` (adds Flask, Flask-Limiter,
+  Waitress); then run `umfrage serve` and open `http://127.0.0.1:5000`.
+  Features: CodeMirror 5 YAML editor with live syntax checking, optional style-file
+  upload (persisted across Generate calls), one-click ZIP download, bilingual UI
+  (en/de, auto-detected from browser language), link to LLM authoring guide.
+  Survey collection is intentionally not exposed — use `umfrage collect` on the CLI.
+- **Generation log in ZIP** — every `umfrage generate` call via the web interface
+  now includes a `*_generation_log_*.txt` in the download ZIP with a human-readable
+  summary (title, organizer, section/question counts, style status, file list).
+- **Security** — nonce-based `Content-Security-Policy`, per-IP rate limiting
+  (20 req/min on `/api/generate`), 100 KB YAML / 50 KB style size guards,
+  `tempfile.TemporaryDirectory` isolation per request.
+- **16 new pytest tests** covering all web server routes, error paths, ZIP contents,
+  security headers, and the generation log.  Tests skip automatically when `[web]`
+  is not installed.
+- **`docs/web_server.md`** — full documentation for the web interface including
+  shared-server deployment guidance.
+
+---
+
 ## [0.3.1] – 2026-08-25
 
 ### Added

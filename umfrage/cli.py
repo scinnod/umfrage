@@ -527,3 +527,53 @@ def cmd_collect(
             click.echo(f"       Skipped: {skipped_path.name}")
             for error in errors:
                 click.echo(f"         • {error}")
+
+
+# ── serve ─────────────────────────────────────────────────────────────────────
+
+@main.command("serve")
+@click.option(
+    "--host",
+    default="127.0.0.1",
+    show_default=True,
+    help="Host address to bind.",
+)
+@click.option(
+    "--port",
+    default=5000,
+    show_default=True,
+    help="TCP port to listen on.",
+)
+def cmd_serve(host: str, port: int) -> None:
+    """Start the web interface for browser-based questionnaire generation.
+
+    Opens a local web server where questionnaire YAML can be written or
+    loaded, optionally paired with a style file, and compiled to a
+    downloadable ZIP (questionnaire .xlsx + metadata .yaml).
+
+    Requires the optional web dependencies:
+
+    \b
+      pip install 'umfrage[web]'
+
+    Collection (umfrage collect) is intentionally not exposed via the web
+    interface — use the CLI for that step.
+    """
+    try:
+        from waitress import serve as waitress_serve  # type: ignore[import-untyped]
+
+        from umfrage.server.app import create_app
+    except ImportError:
+        click.echo(
+            "[ERROR] Web server dependencies not installed.\n"
+            "        Run: pip install 'umfrage[web]'",
+            err=True,
+        )
+        sys.exit(1)
+
+    app = create_app()
+    url = f"http://{host}:{port}"
+    click.echo(f"[INFO] umfrage web server listening at {url}")
+    click.echo(f"[INFO] Open {url} in your browser.")
+    click.echo("[INFO] Press Ctrl+C to stop.")
+    waitress_serve(app, host=host, port=port, threads=4)
