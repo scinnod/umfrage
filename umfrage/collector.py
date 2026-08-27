@@ -633,7 +633,10 @@ def _build_result_workbook(
                 col_idx = fixed_cols + 1 + resp_idx
                 answer_value = vr.answers.get(q.id)
                 cell = ws.cell(row=row, column=col_idx, value=answer_value)
-                cell.alignment = Alignment(horizontal="center", vertical="center")
+                if q.answer.type == AnswerType.FREETEXT:
+                    cell.alignment = Alignment(horizontal="left", vertical="top", wrap_text=True)
+                else:
+                    cell.alignment = Alignment(horizontal="center", vertical="center")
                 cell.border = border
                 # Highlight cells that are empty (required) OR carry the missing-answer marker
                 is_empty = answer_value is None or str(answer_value).strip() == ""

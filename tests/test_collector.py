@@ -276,6 +276,49 @@ class TestResultWorkbook:
         title_cell = ws.cell(row=1, column=1).value
         assert sample_questionnaire.title in str(title_cell)
 
+    def test_freetext_answer_cells_are_left_aligned(
+        self, responses_folder: Path, sample_style, tmp_path: Path
+    ) -> None:
+        out_dir = tmp_path / "out"
+        summaries = collect_all(responses_folder, sample_style, out_dir)
+        wb = load_workbook(summaries[0].output_path)
+        ws = wb["Results"]
+        # Find the G.Q3 row (FREETEXT question) by its Q-ID in column 2
+        freetext_row = None
+        for r in range(1, ws.max_row + 1):
+            if ws.cell(row=r, column=2).value == "G.Q3":
+                freetext_row = r
+                break
+        assert freetext_row is not None, "G.Q3 (freetext) row not found in result sheet"
+        # Respondent answer columns start at column 5
+        for col in range(5, 7):
+            cell = ws.cell(row=freetext_row, column=col)
+            assert cell.alignment.horizontal == "left", (
+                f"Expected left alignment for freetext answer col {col}, "
+                f"got '{cell.alignment.horizontal}'"
+            )
+
+    def test_non_freetext_answer_cells_are_centered(
+        self, responses_folder: Path, sample_style, tmp_path: Path
+    ) -> None:
+        out_dir = tmp_path / "out"
+        summaries = collect_all(responses_folder, sample_style, out_dir)
+        wb = load_workbook(summaries[0].output_path)
+        ws = wb["Results"]
+        # G.Q1 is a SCALE question — its answer cells must remain centered
+        scale_row = None
+        for r in range(1, ws.max_row + 1):
+            if ws.cell(row=r, column=2).value == "G.Q1":
+                scale_row = r
+                break
+        assert scale_row is not None, "G.Q1 (scale) row not found in result sheet"
+        for col in range(5, 7):
+            cell = ws.cell(row=scale_row, column=col)
+            assert cell.alignment.horizontal == "center", (
+                f"Expected center alignment for scale answer col {col}, "
+                f"got '{cell.alignment.horizontal}'"
+            )
+
 
 class TestSourceFileRow:
     """Row 5 of the result sheet must list response filenames with hyperlinks."""
