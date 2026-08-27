@@ -236,53 +236,60 @@ Multiple questionnaires in one folder are handled automatically — one
 
 ### questionnaire.yaml
 
-See `config/questionnaire_sample.yaml` for a fully annotated template and
-`docs/questionnaire.schema.json` for the JSON Schema.
+See [config/questionnaire_sample.yaml](config/questionnaire_sample.yaml) for a
+fully annotated template, or [examples/questionnaire.yaml](examples/questionnaire.yaml)
+for a working example demonstrating all answer types.
 
-**Top-level structure:**
+**Structure overview** (excerpt from the example):
 
 ```yaml
-title: "Survey Title"
+title: "Survey Tools in Research — A Meta-Survey"
 version: "1.0"
 
 organizer:
-  name: "Dr. Jane Smith"
-  institution: "Research Institute"
-  email: "j.smith@example.org"
-  phone: "+1 555-0100"          # optional
+  name: "Prof. Dr. Ludwig von Drake"
+  institution: "Duckburg Academy of Sciences"
+  email: "l.von-drake@duckburg.edu"
 
 respondent_fields:
   - label: "Name"
-  - label: "Institution"     # used as column header in the result spreadsheet
+  - label: "Institution"   # drives per-respondent column header in results
   - label: "Email"
-    required: false             # default: true
+    required: false         # default: true
 
-# TIP: include a field whose label contains "institution" or "organization".
-# The collector uses it as the per-respondent column header in the result
-# spreadsheet.  If no such field exists it falls back to the first field.
-
-# Optional: define named option lists here and reference them with
-# choices_ref: <name> in any choices-type question.
-choice_lists:
-  satisfaction_level:
-    - "Very dissatisfied"
-    - "Dissatisfied"
-    - "Neutral"
-    - "Satisfied"
-    - "Very satisfied"
+choice_lists:              # reusable option lists for choices-type questions
+  questionnaire_format:
+    - "YAML-configured Excel (umfrage)"
+    - "Web forms (e.g., LimeSurvey, SurveyMonkey)"
+    - "Other"
 
 sections:
-  - title: "Section Name"
+  - title: "Usage Patterns"
     questions:
-      - id: "S1.Q1"             # unique, slug-safe
-        text: "Question text"
+      - id: "USG.Q1"
+        text: "How frequently do you design or distribute questionnaires?"
         answer:
-          type: scale           # scale | yes_no | freetext | choices
-          min_value: 1          # required for scale
-          max_value: 5          # required for scale
-          description: "1=poor, 5=excellent"  # optional hint
-        comment: "Additional context"         # optional
-        required: true          # default: true
+          type: scale
+          min_value: 1
+          max_value: 5
+          description: "1 = rarely, 5 = regularly"
+
+      - id: "USG.Q2"
+        text: "Does your institution use Excel-based survey forms?"
+        answer:
+          type: yes_no
+
+      - id: "USG.Q3"
+        text: "Which questionnaire format do you prefer?"
+        answer:
+          type: choices
+          choices_ref: questionnaire_format   # references choice_lists above
+
+      - id: "USG.Q4"
+        text: "Any other remarks?"
+        answer:
+          type: freetext
+        required: false
 ```
 
 **Answer types:**
