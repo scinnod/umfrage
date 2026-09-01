@@ -59,7 +59,7 @@ The YAML editor (CodeMirror 5) provides:
 | Control | Action |
 |---|---|
 | **⬆ Load YAML** | Open a local `.yaml` / `.yml` file and load it into the editor. |
-| **⬇ Save YAML** | Save the current editor content as `questionnaire.yaml` to your local machine. |
+| **⬇ Download YAML** | Download the current editor content as `questionnaire.yaml` to your local machine. |
 | **Style (optional) → Choose…** | Upload a `style.yaml` customisation file.  The selection persists across multiple Generate calls until the page is closed or a new file is selected. |
 
 ### Generating a questionnaire
