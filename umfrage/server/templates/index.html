@@ -253,6 +253,9 @@
 
   <!-- LLM guide notice — filled by applyTranslations() -->
   <div class="info-box" id="llm-box"></div>
+
+  <!-- Collect notice — filled by applyTranslations() -->
+  <div class="info-box" id="collect-box"></div>
 </main>
 
 <script nonce="{{ nonce }}">
@@ -284,6 +287,14 @@ const T = {
       + ' provides a full field reference, constraints, and examples'
       + ' for use as context with any AI assistant (ChatGPT, Claude, etc.).'
       + ' Share it together with your authoring request to get a valid YAML back.',
+    collectBoxHtml:
+      '<strong>\ud83d\udce5 Collecting responses:</strong> '
+      + 'Once respondents return their filled-in Excel files, you can use '
+      + '<code>umfrage collect</code> (command line) to validate and aggregate '
+      + 'them automatically into a single result spreadsheet — '
+      + 'see the <a href="https://github.com/scinnod/umfrage#umfrage-collect-responses_dir"'
+      + ' target="_blank" rel="noopener">collect documentation</a>. '
+      + 'Of course, manual processing works just as well.',,
   },
   de: {
     subtitle:    'Fragebogen-Generator',
@@ -309,6 +320,14 @@ const T = {
       + ' enth\u00e4lt eine vollst\u00e4ndige Feldreferenz, Einschr\u00e4nkungen und Beispiele'
       + ' als Kontext f\u00fcr KI-Assistenten (ChatGPT, Claude u.\u00a0a.).'
       + ' Teilen Sie ihn zusammen mit Ihrem Erstellungsauftrag, um ein g\u00fcltiges YAML zu erhalten.',
+    collectBoxHtml:
+      '<strong>\ud83d\udce5 Antworten einsammeln:</strong> '
+      + 'Sobald die Teilnehmenden ihre ausgef\u00fcllten Excel-Dateien zur\u00fcckgeschickt haben, '
+      + 'k\u00f6nnen Sie <code>umfrage collect</code> (Kommandozeile) nutzen, um sie '
+      + 'automatisch zu validieren und zusammenzuf\u00fchren — '
+      + 'siehe <a href="https://github.com/scinnod/umfrage#umfrage-collect-responses_dir"'
+      + ' target="_blank" rel="noopener">collect-Dokumentation</a>. '
+      + 'Nat\u00fcrlich ist auch eine manuelle Auswertung m\u00f6glich.',
   },
 };
 
@@ -325,6 +344,7 @@ function applyTranslations() {
   // Safe: strings are hardcoded in this script, not from user input
   document.getElementById('validation-note').innerHTML    = t.validationNoteHtml;
   document.getElementById('llm-box').innerHTML            = t.llmBoxHtml;
+  document.getElementById('collect-box').innerHTML        = t.collectBoxHtml;
 }
 
 applyTranslations();

@@ -176,8 +176,8 @@ pip install 'umfrage[web]'
 umfrage serve          # opens http://127.0.0.1:5000
 ```
 
-The web interface provides a YAML editor with live syntax and schema
-validation, an optional style-file upload, and a one-click **Generate &
+The web interface provides a YAML editor with live YAML syntax checking,
+an optional style-file upload, and a one-click **Generate &
 Download ZIP** button.  Survey **collection** is intentionally not
 exposed — use `umfrage collect` on the CLI for that step.
 
@@ -248,6 +248,20 @@ the `missing_answer_marker` (default `XXXXX`) and highlighted.
 Multiple questionnaires in one folder are handled automatically — one
 `results_*.xlsx` is produced per questionnaire group found.  Use
 `umfrage list` to preview groups and `--survey` to select a subset.
+
+---
+
+### `umfrage serve`
+
+Start the optional browser-based questionnaire generator.
+
+| Option | Default | Description |
+|---|---|---|
+| `--host HOST` | `127.0.0.1` | Bind address.  Use `0.0.0.0` for LAN access. |
+| `--port PORT` | `5000` | TCP port. |
+
+Requires the `[web]` extra (`pip install 'umfrage[web]'`).
+See [docs/web_server.md](docs/web_server.md) for full details.
 
 ---
 
@@ -353,7 +367,7 @@ All color values are 6-digit hex codes **without** a `#`.
 ```
 umfrage/
 ├── umfrage/
-│   ├── cli.py            CLI entry point (validate, generate, collect, list)
+│   ├── cli.py            CLI entry point (validate, generate, collect, list, serve)
 │   ├── models.py         Pydantic domain models
 │   ├── config_loader.py  YAML loading and Pydantic validation
 │   ├── checker.py        Completeness checks (16 rules)
@@ -362,7 +376,8 @@ umfrage/
 │   ├── collector.py      Multi-questionnaire aggregation
 │   ├── translator.py     i18n string lookup
 │   ├── styles.py         openpyxl styling helpers
-│   └── i18n/             Translation files (en.yaml, de.yaml)
+│   ├── i18n/             Translation files (en.yaml, de.yaml)
+│   └── server/           Web server subpackage (Flask app, routes, templates)
 ├── config/
 │   ├── questionnaire_sample.yaml  Annotated template (tracked)
 │   └── style.yaml                 Appearance config (tracked)

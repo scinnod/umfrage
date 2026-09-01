@@ -47,12 +47,12 @@ umfrage serve --host 0.0.0.0 --port 8080
 
 ### Editor
 
-The YAML editor (CodeMirror 6) provides:
+The YAML editor (CodeMirror 5) provides:
 
 - **Syntax highlighting** for YAML.
-- **Inline error markers** as you type — syntax errors from js-yaml and
-  structural warnings from the embedded questionnaire JSON Schema (Ajv).
-- **600 ms debounce** so validation runs only after you pause typing.
+- **Inline error markers** — YAML syntax errors are highlighted as you type
+  via js-yaml.  Full structural validation against the questionnaire schema
+  is performed server-side when you click **Generate**.
 
 ### File operations
 
