@@ -62,6 +62,13 @@ def _generation_log(
         f"{xlsx_name}  — questionnaire form for respondents",
         f"{meta_name}  — required by 'umfrage collect'",
         f"{log_name}  — this file",
+        "",
+        "Next steps",
+        "----------",
+        f"1. Send {xlsx_name} to your respondents.",
+        f"2. Keep {meta_name} in your responses folder.",
+        "   It is required when running 'umfrage collect' for automated aggregation.",
+        "3. umfrage collect <responses_dir>",
     ]
     return "\n".join(lines) + "\n"
 
