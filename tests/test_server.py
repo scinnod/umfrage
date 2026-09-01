@@ -205,3 +205,33 @@ def test_generate_oversized_style_file_returns_400(client, valid_yaml):
     )
     assert r.status_code == 400
     assert "50 KB" in r.get_json()["error"]
+
+
+# ── index.html template integrity ─────────────────────────────────────────────
+
+
+def test_index_contains_required_element_ids(client):
+    """All IDs referenced by applyTranslations() must be present in the page."""
+    r = client.get("/")
+    html = r.data.decode()
+    for eid in ("llm-box", "collect-box", "validation-note", "editor-container"):
+        assert f'id="{eid}"' in html, f"Missing element: id=\"{eid}\""
+
+
+def test_index_inline_script_has_no_double_commas(client):
+    """A double comma (,,) in JS is a syntax error that silently kills the editor."""
+    r = client.get("/")
+    html = r.data.decode()
+    # Isolate the inline <script> block so we don't false-positive on HTML content
+    start = html.find("<script ")
+    end = html.rfind("</script>")
+    assert start != -1 and end != -1
+    script = html[start:end]
+    assert ",," not in script, "Double comma found in inline script — JS syntax error"
+
+
+def test_index_both_i18n_locales_define_collect_box(client):
+    """Both 'en' and 'de' translation objects must define collectBoxHtml."""
+    r = client.get("/")
+    script_block = r.data.decode()
+    assert script_block.count("collectBoxHtml:") == 2
